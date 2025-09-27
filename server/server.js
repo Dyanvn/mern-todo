@@ -24,8 +24,20 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
+// Thêm middleware xử lý lỗi toàn cục ngay tại đây
+app.use((err, req, res, next) => {
+  console.error("Server error:", err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 app.use("/api/todos", todoRoutes);
+
+// Thêm log cho DELETE request ngay tại đây
+app.delete("/api/todos/:id", (req, res, next) => {
+  console.log("Received DELETE request for ID:", req.params.id); // Log ID
+  next();
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
